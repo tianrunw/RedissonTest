@@ -1,5 +1,7 @@
 # RedissonTest
 
+This repo reproduces a memory leak issue in Redisson library when `RJsonBucket.get()` is called concurrently.
+
 ## Versions
 ```
 3.26.1 (bad)
@@ -19,6 +21,8 @@
 ## Change
 
 Redisson change log: https://github.com/redisson/redisson/blob/master/CHANGELOG.md
+
+Diff between 3.25.0 and 3.25.1: https://github.com/redisson/redisson/compare/redisson-3.25.0...redisson-3.25.1
 
 18-Dec-2023 - 3.25.1 released
 

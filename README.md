@@ -38,3 +38,9 @@ Fixed - natMapper isn't applied to slaves and master nodes at start in Sentinel 
 Fixed - method invocation hangs after failover if retryInterval = 0
 Fixed - transactional Map and MapCache keySet method returns inconsistent state
 Fixed - Multilock lock method doesn't work properly with non-MILLISECONDS TimeUnit
+
+
+## Steps to reproduce
+
+1. Download and run Redis Stack with Docker. https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/docker/
+2. Run the Main class with IntelliJ Profiler.

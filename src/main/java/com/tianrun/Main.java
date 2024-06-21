@@ -10,6 +10,7 @@ import org.redisson.config.Config;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     private static final Logger log = LogManager.getLogger();
@@ -17,14 +18,15 @@ public class Main {
     private static final int NUM_THREADS = 10;
     private static final JacksonCodec<Customer> CUSTOMER_CODEC = new JacksonCodec<>(Customer.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
 
         RedissonClient redisson = Redisson.create(config);
         setBucket(redisson);
 
-        try (ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS)) {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+        try {
             log.info("Execution start");
 
             for (int i = 0; i < NUM_THREADS; i++) {
@@ -40,6 +42,12 @@ public class Main {
                     }
                 });
             }
+
+            executor.shutdown();
+            executor.awaitTermination(1, TimeUnit.HOURS);
+
+        } finally {
+            redisson.shutdown();
         }
     }
 

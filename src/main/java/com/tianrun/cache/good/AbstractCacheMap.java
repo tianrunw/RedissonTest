@@ -1,10 +1,9 @@
-package com.tianrun.cache.bad;
+package com.tianrun.cache.good;
 
 import com.tianrun.cache.Cache;
 import com.tianrun.cache.CachedValue;
 import com.tianrun.cache.ExpirableValue;
 import com.tianrun.cache.StdCachedValue;
-import com.tianrun.cache.WrappedLock;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
@@ -13,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Version 3.25.1
+ * Version 3.25.0
  */
 public abstract class AbstractCacheMap<K, V> implements Cache<K, V> {
 
@@ -473,16 +472,16 @@ public abstract class AbstractCacheMap<K, V> implements Cache<K, V> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        CachedValue<K, V> e = lock.execute(() -> {
+        CachedValue<K, V> e = null;
+        synchronized (map) {
             CachedValue<K, V> entry = map.get(key);
             if (entry != null
                     && entry.getValue().equals(value)
                     && !isValueExpired(entry)) {
                 map.remove(key);
-                return entry;
+                e = entry;
             }
-            return null;
-        });
+        }
         if (e != null) {
             onValueRemove(e);
             return true;
@@ -490,21 +489,19 @@ public abstract class AbstractCacheMap<K, V> implements Cache<K, V> {
         return false;
     }
 
-    private final WrappedLock lock = new WrappedLock();
-
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        CachedValue<K, V> e = lock.execute(() -> {
+        CachedValue<K, V> e = null;
+        synchronized (map) {
             CachedValue<K, V> entry = map.get(key);
             if (entry != null
                     && entry.getValue().equals(oldValue)
                     && !isValueExpired(entry)) {
                 CachedValue<K, V> newEntry = create(key, newValue, timeToLiveInMillis, maxIdleInMillis);
                 map.put(key, newEntry);
-                return entry;
+                e = entry;
             }
-            return null;
-        });
+        }
         if (e != null) {
             onValueRemove(e);
             return true;
@@ -514,16 +511,16 @@ public abstract class AbstractCacheMap<K, V> implements Cache<K, V> {
 
     @Override
     public V replace(K key, V value) {
-        CachedValue<K, V> e = lock.execute(() -> {
+        CachedValue<K, V> e = null;
+        synchronized (map) {
             CachedValue<K, V> entry = map.get(key);
             if (entry != null
                     && !isValueExpired(entry)) {
                 CachedValue<K, V> newEntry = create(key, value, timeToLiveInMillis, maxIdleInMillis);
                 map.put(key, newEntry);
-                return entry;
+                e = entry;
             }
-            return null;
-        });
+        }
         if (e != null) {
             onValueRemove(e);
             return e.getValue();

@@ -36,7 +36,7 @@ class LRUCacheMapTest {
 
         for (int i = 0; i < NUM_THREADS; i++) {
             final int threadNumber = i;
-            executor.submit(() -> putLoop(lruCacheMap, threadNumber));
+            executor.submit(() -> putInfiniteLoop(lruCacheMap, threadNumber));
         }
 
         executor.shutdown();
@@ -47,6 +47,16 @@ class LRUCacheMapTest {
 
     static void putLoop(Map<Codec, Codec> lruCacheMap, int threadNumber) {
         for (int i = 0; i < CACHE_SIZE * 2; i++) {
+            try {
+                lruCacheMap.put(new JsonCodecWrapper(CUSTOMER_CODEC), new JsonCodecWrapper(CUSTOMER_CODEC));
+            } catch (Exception e) {
+                log.error("Thread {} failed: ", threadNumber, e);
+            }
+        }
+    }
+
+    static void putInfiniteLoop(Map<Codec, Codec> lruCacheMap, int threadNumber) {
+        while (true) {
             try {
                 lruCacheMap.put(new JsonCodecWrapper(CUSTOMER_CODEC), new JsonCodecWrapper(CUSTOMER_CODEC));
             } catch (Exception e) {

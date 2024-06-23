@@ -50,7 +50,7 @@ class UnsafeQueueTest {
             try {
                 queue.add(new JsonCodecWrapper(CUSTOMER_CODEC));
             } catch (Exception e) {
-//                log.error(e);
+                log.error(e);
             }
         }
     }
@@ -61,7 +61,7 @@ class UnsafeQueueTest {
             try {
                 queue.add(new JsonCodecWrapper(CUSTOMER_CODEC));
             } catch (Exception e) {
-//                log.error(e);
+                log.error(e);
             }
         }
     }

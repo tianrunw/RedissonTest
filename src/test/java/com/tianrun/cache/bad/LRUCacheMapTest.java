@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.tianrun.cache.bad.LRUCacheMap.CURR_THREAD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LRUCacheMapTest {
@@ -56,11 +57,13 @@ class LRUCacheMapTest {
     }
 
     static void putInfiniteLoop(Map<Codec, Codec> lruCacheMap, int threadNumber) {
+        CURR_THREAD.set(threadNumber);
         while (true) {
             try {
                 lruCacheMap.put(new JsonCodecWrapper(CUSTOMER_CODEC), new JsonCodecWrapper(CUSTOMER_CODEC));
+                Thread.sleep(2);
             } catch (Exception e) {
-                log.error("Thread {} failed: ", threadNumber, e);
+//                log.error("Thread {} failed: ", threadNumber, e);
             }
         }
     }

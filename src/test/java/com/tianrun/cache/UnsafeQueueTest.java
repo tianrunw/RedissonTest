@@ -60,7 +60,6 @@ class UnsafeQueueTest {
         while (true) {
             try {
                 queue.add(new JsonCodecWrapper(CUSTOMER_CODEC));
-                Thread.sleep(2);
             } catch (Exception e) {
 //                log.error(e);
             }

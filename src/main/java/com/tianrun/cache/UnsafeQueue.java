@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class UnsafeQueue<T> {
@@ -16,7 +18,10 @@ public class UnsafeQueue<T> {
 
     private final Set<T> queue = Collections.synchronizedSet(new LinkedHashSet<>());
     private final ReentrantLock lock = new ReentrantLock();
+
     private final int maxSize;
+    private final AtomicInteger addCount = new AtomicInteger();
+    private final AtomicInteger removeCount = new AtomicInteger();
 
     public UnsafeQueue(int maxSize) {
         this.maxSize = maxSize;
@@ -28,16 +33,11 @@ public class UnsafeQueue<T> {
 
     // @NotThreadSafe
     public void add(T value) {
-        try {
-            if (queue.size() >= maxSize) {
-                onFullLock();
-            }
-            queue.add(value);
-
-        } catch (Exception e) {
-            log.error("Thread {} failed, queue size: {}, lock hold: {}, lock queue: {}", CURR_THREAD.get(),
-                    queue.size(), lock.getHoldCount(), lock.getQueueLength(), e);
+        if (queue.size() >= maxSize) {
+            onFullLock();
         }
+        queue.add(value);
+        addCount.addAndGet(1);
     }
 
     private void onFullSync() {
@@ -57,7 +57,12 @@ public class UnsafeQueue<T> {
             if (iter.hasNext()) {
                 iter.next();
                 iter.remove();
+                removeCount.addAndGet(1);
             }
+        } catch (Exception e) {
+            log.error("Thread {} failed, queue size: {}, lock hold: {}, lock queue: {}, addCount: {}, removeCount: {}",
+                    CURR_THREAD.get(), queue.size(), lock.getHoldCount(), lock.getQueueLength(), addCount.get(), removeCount.get(), e);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -68,6 +73,15 @@ public class UnsafeQueue<T> {
         if (iter.hasNext()) {
             iter.next();
             iter.remove();
+        }
+    }
+
+    private static void randomSleep() {
+        try {
+            int randomMillis = ThreadLocalRandom.current().nextInt(1, 11);
+            Thread.sleep(randomMillis);
+        } catch (InterruptedException e) {
+            log.error("Failed to sleep", e);
         }
     }
 }

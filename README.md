@@ -44,3 +44,36 @@ Fixed - Multilock lock method doesn't work properly with non-MILLISECONDS TimeUn
 
 1. Download and run Redis Stack with Docker. https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/docker/
 2. Run the Main class with IntelliJ Profiler.
+
+
+## Logs
+
+### UnsafeQueue with onFullLock()
+
+```
+2024-06-23 13:49:51.436 [pool-2-thread-8] ERROR com.tianrun.cache.UnsafeQueue - Thread 7 failed, queue size: 12871601, lock hold: 1, lock queue: 9, addCount: 12873019, removeCount: 12872994
+java.util.ConcurrentModificationException: null
+	at java.util.LinkedHashMap$LinkedHashIterator.nextNode(LinkedHashMap.java:756) ~[?:?]
+	at java.util.LinkedHashMap$LinkedKeyIterator.next(LinkedHashMap.java:778) ~[?:?]
+	at com.tianrun.cache.UnsafeQueue.onFullLock(UnsafeQueue.java:68) ~[classes/:?]
+	at com.tianrun.cache.UnsafeQueue.add(UnsafeQueue.java:37) ~[classes/:?]
+	at com.tianrun.cache.UnsafeQueueTest.addInfiniteLoop(UnsafeQueueTest.java:62) ~[test-classes/:?]
+	at com.tianrun.cache.UnsafeQueueTest.lambda$testMultiThreaded$0(UnsafeQueueTest.java:39) ~[test-classes/:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:840) [?:?]
+2024-06-23 13:49:51.439 [pool-2-thread-6] ERROR com.tianrun.cache.UnsafeQueue - Thread 5 failed, queue size: 12875336, lock hold: 1, lock queue: 5, addCount: 12876754, removeCount: 12876732
+java.util.ConcurrentModificationException: null
+	at java.util.LinkedHashMap$LinkedHashIterator.remove(LinkedHashMap.java:769) ~[?:?]
+	at com.tianrun.cache.UnsafeQueue.onFullLock(UnsafeQueue.java:69) ~[classes/:?]
+	at com.tianrun.cache.UnsafeQueue.add(UnsafeQueue.java:37) ~[classes/:?]
+	at com.tianrun.cache.UnsafeQueueTest.addInfiniteLoop(UnsafeQueueTest.java:62) ~[test-classes/:?]
+	at com.tianrun.cache.UnsafeQueueTest.lambda$testMultiThreaded$0(UnsafeQueueTest.java:39) ~[test-classes/:?]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) [?:?]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) [?:?]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) [?:?]
+	at java.lang.Thread.run(Thread.java:840) [?:?]
+```
